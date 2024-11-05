@@ -1,0 +1,59 @@
+body {
+    background-color: #f8f9fa; /* A light grey background for a modern feel */
+    font-family: 'Arial', sans-serif; /* Maintain a clean, modern font throughout */
+}
+
+h1, h2 {
+    color: #007bff; /* Using Bootstrap's primary blue to keep consistency */
+}
+
+/* Custom styles for forms to enhance visual layout */
+.form-inline .form-group {
+    width: 100%; /* Full width form controls within their container */
+}
+
+/* Enhancing list items for clarity and interaction */
+.list-group-item {
+    transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transitions for hover effects */
+}
+
+.list-group-item:hover {
+    background-color: #f0f0f0; /* Slightly darker on hover for interactive feedback */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Image styles for better display of thumbnails */
+.img-thumbnail {
+    max-width: 50px; /* Smaller thumbnail size */
+    height: auto;
+    margin-right: 10px;
+    max-height: 100px; /* Limiting image height for uniformity */
+    margin-bottom: 10px; /* Space below images */
+}
+
+/* Button styling for actions */
+.btn-primary {
+    background-color: #0069d9; /* A slightly darker blue than the default Bootstrap primary */
+    border-color: #0062cc; /* Consistent with the button background */
+}
+
+.btn-primary:hover {
+    background-color: #005cbf; /* Even darker on hover for a good interactive feel */
+    border-color: #0056b4;
+}
+
+/* Padding and margins for spacing and alignment */
+.padded {
+    padding: 15px; /* Uniform padding for content separation */
+}
+
+.margin-top-custom {
+    margin-top: 25px; /* Custom margin for the top spacing of elements */
+}
+
+/* Styling for form inputs for a cohesive look */
+.form-control-file {
+    border: 1px solid #ced4da; /* Match Bootstrap's default form control styling */
+    border-radius: 0.25rem; /* Rounded corners for the input */
+    padding: 0.375rem 0.75rem; /* Padding to match other form elements */
+}

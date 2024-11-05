@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Annotations</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsoneditor@9.7.3/dist/jsoneditor.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { 
+            background-color: #f8f9fa; 
+            padding: 20px;
+        }
+        .container { 
+            display: flex; 
+            gap: 30px; 
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            align-items: start; /* Add this */
+        }
+        .image-container { 
+            position: relative; 
+            flex: 1;
+            background: #f8f9fa;
+            padding: 0; /* Changed from 10px */
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            display: inline-block; /* Add this */
+            overflow: hidden; /* Add this */
+        }
+        .json-container { 
+            flex: 1; 
+            min-height: 600px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .annotation { 
+            position: absolute; 
+            border: 2px solid #dc3545;
+            background-color: transparent;
+            touch-action: none;
+            cursor: move;
+            resize: both;
+            overflow: auto;
+            transition: border-color 0.2s;
+            transform-origin: top left; /* Add this */
+            pointer-events: all; /* Add this */
+        }
+        .annotation::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 8px;
+            height: 8px;
+            cursor: se-resize;
+            background: #dc3545;
+            border-radius: 2px;
+        }
+        .annotation:hover {
+            border: 2px solid #007bff;
+            z-index: 1000;
+        }
+        .annotation:hover::after {
+            background: #007bff;
+        }
+        img { 
+            max-width: 100%; 
+            height: auto;
+            border-radius: 4px;
+        }
+        #mainImage {
+            max-width: 100%;
+            height: auto;
+            display: block; /* Add this */
+            width: 100%;
+            height: auto;
+        }
+        .button-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .undo-button, .save-button {
+            padding: 12px 24px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .undo-button {
+            background-color: #dc3545;
+        }
+
+        .save-button {
+            background-color: #28a745;
+        }
+
+        .undo-button:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .save-button:hover {
+            background-color: #218838;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-container">
+            <img id="mainImage" src="{{ url_for('static', filename='images/folder2/' + filename) }}" alt="Annotated Image">
+            {% for a in annotations %}
+            <div class="annotation" data-index="{{loop.index0}}" style="left:{{a.x}}px;top:{{a.y}}px;width:{{a.width}}px;height:{{a.height}}px"></div>
+            {% endfor %}
+        </div>
+        <div id="jsoneditor" class="json-container"></div>
+    </div>
+
+    <!-- Add this right after the container -->
+    <div class="button-container">
+        <button class="undo-button" onclick="undoAllChanges()">Undo All</button>
+        <button class="save-button" onclick="saveChanges()">Save Changes</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.7.3/dist/jsoneditor.min.js"></script>
+    <script>
+        // Add these as global variables at the start of your script
+        let originalImageWidth = 0;
+        let originalImageHeight = 0;
+        let currentScaleX = 1;
+        let currentScaleY = 1;
+        let originalJsonData = null;
+        
+        // Wait for image to load to get its natural dimensions
+        document.getElementById('mainImage').onload = function() {
+            originalImageWidth = this.naturalWidth;
+            originalImageHeight = this.naturalHeight;
+            scaleAnnotations();
+        }
+
+        // Modify the scaleAnnotations function
+        function scaleAnnotations() {
+            const image = document.getElementById('mainImage');
+            const container = document.querySelector('.image-container');
+            const displayedWidth = image.clientWidth;
+            const displayedHeight = image.clientHeight;
+            
+            // Set container height to match image
+            container.style.height = `${displayedHeight}px`;
+            
+            currentScaleX = displayedWidth / originalImageWidth;
+            currentScaleY = displayedHeight / originalImageHeight;
+
+            document.querySelectorAll('.annotation').forEach(annotation => {
+                const originalX = parseFloat(annotation.getAttribute('data-original-x') || annotation.style.left);
+                const originalY = parseFloat(annotation.getAttribute('data-original-y') || annotation.style.top);
+                const originalWidth = parseFloat(annotation.getAttribute('data-original-width') || annotation.style.width);
+                const originalHeight = parseFloat(annotation.getAttribute('data-original-height') || annotation.style.height);
+
+                // Store original values if not already stored
+                if (!annotation.hasAttribute('data-original-x')) {
+                    annotation.setAttribute('data-original-x', originalX);
+                    annotation.setAttribute('data-original-y', originalY);
+                    annotation.setAttribute('data-original-width', originalWidth);
+                    annotation.setAttribute('data-original-height', originalHeight);
+                }
+
+                annotation.style.left = `${originalX * currentScaleX}px`;
+                annotation.style.top = `${originalY * currentScaleY}px`;
+                annotation.style.width = `${originalWidth * currentScaleX}px`;
+                annotation.style.height = `${originalHeight * currentScaleY}px`;
+            });
+        }
+
+        // Add resize handler
+        window.addEventListener('resize', scaleAnnotations);
+
+        const container = document.getElementById("jsoneditor");
+        const options = {
+            mode: 'tree',
+            modes: ['tree', 'view', 'form', 'code'],
+            onChangeJSON: function(json) {
+                updateAnnotations(json);
+            },
+            navigationBar: false,
+            statusBar: false,
+            search: true,
+            mainMenuBar: true
+        };
+        const editor = new JSONEditor(container, options);
+        const jsonData = {{ json_data|tojson|safe }};
+        originalJsonData = JSON.parse(JSON.stringify(jsonData)); // Deep copy
+        editor.set(jsonData);
+
+        // Modify updateAnnotations function
+        function updateAnnotations(json) {
+            const annotations = json['{{ filename }}'].paragraphs;
+            const image = document.getElementById('mainImage');
+            const scaleX = image.clientWidth / originalImageWidth;
+            const scaleY = image.clientHeight / originalImageHeight;
+
+            document.querySelectorAll('.annotation').forEach((el, index) => {
+                const data = annotations[index];
+                if (data) {
+                    // Store original values
+                    el.setAttribute('data-original-x', data.x);
+                    el.setAttribute('data-original-y', data.y);
+                    el.setAttribute('data-original-width', data.width);
+                    el.setAttribute('data-original-height', data.height);
+
+                    // Apply scaled values
+                    el.style.left = `${data.x * currentScaleX}px`;
+                    el.style.top = `${data.y * currentScaleY}px`;
+                    el.style.width = `${data.width * currentScaleX}px`;
+                    el.style.height = `${data.height * currentScaleY}px`;
+                }
+            });
+        }
+
+        interact('.annotation')
+            .draggable({
+                inertia: true,
+                modifiers: [
+                    interact.modifiers.restrictRect({
+                        restriction: 'parent'
+                    })
+                ],
+                listeners: {
+                    move(event) {
+                        const target = event.target;
+                        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+                        target.style.transform = `translate(${x}px, ${y}px)`;
+                        target.setAttribute('data-x', x);
+                        target.setAttribute('data-y', y);
+
+                        updateJSON(target, x, y);
+                    }
+                }
+            })
+            .resizable({
+                edges: { left: true, right: true, bottom: true, top: true },
+                inertia: true,
+                modifiers: [
+                    interact.modifiers.restrictSize({
+                        min: { width: 10, height: 10 }
+                    })
+                ],
+                listeners: {
+                    move: function (event) {
+                        let { x, y } = event.target.getBoundingClientRect();
+                        const target = event.target;
+                        const index = target.getAttribute('data-index');
+                        
+                        // Update the element's style
+                        target.style.width = `${event.rect.width}px`;
+                        target.style.height = `${event.rect.height}px`;
+
+                        // Update JSON data
+                        const json = editor.get();
+                        const container = document.querySelector('.image-container').getBoundingClientRect();
+                        
+                        // Convert to original scale before saving
+                        const originalX = (x - container.left) / currentScaleX;
+                        const originalY = (y - container.top) / currentScaleY;
+                        const originalWidth = event.rect.width / currentScaleX;
+                        const originalHeight = event.rect.height / currentScaleY;
+
+                        json['{{ filename }}'].paragraphs[index].x = Math.round(originalX);
+                        json['{{ filename }}'].paragraphs[index].y = Math.round(originalY);
+                        json['{{ filename }}'].paragraphs[index].width = Math.round(originalWidth);
+                        json['{{ filename }}'].paragraphs[index].height = Math.round(originalHeight);
+
+                        editor.update(json);
+                    }
+                }
+            });
+
+        // Add mouseover highlighting for boxes
+        document.querySelectorAll('.annotation').forEach(box => {
+            box.addEventListener('mouseenter', (e) => {
+                const index = e.target.getAttribute('data-index');
+                const path = `${filename}.paragraphs.${index}`;
+                editor.expandTo([filename, 'paragraphs', index]);
+                editor.setSelection({
+                    start: path,
+                    end: path
+                });
+            });
+        });
+
+        // Modify updateJSON function
+        function updateJSON(target, x, y) {
+            const index = target.getAttribute('data-index');
+            const json = editor.get();
+            const rect = target.getBoundingClientRect();
+            const container = document.querySelector('.image-container').getBoundingClientRect();
+            const image = document.getElementById('mainImage');
+            
+            // Convert coordinates back to original scale
+            const originalX = (rect.left - container.left) / currentScaleX;
+            const originalY = (rect.top - container.top) / currentScaleY;
+            const originalWidth = rect.width / currentScaleX;
+            const originalHeight = rect.height / currentScaleY;
+
+            json['{{ filename }}'].paragraphs[index].x = Math.round(originalX);
+            json['{{ filename }}'].paragraphs[index].y = Math.round(originalY);
+            json['{{ filename }}'].paragraphs[index].width = Math.round(originalWidth);
+            json['{{ filename }}'].paragraphs[index].height = Math.round(originalHeight);
+
+            // Store original values in data attributes
+            target.setAttribute('data-original-x', originalX);
+            target.setAttribute('data-original-y', originalY);
+            target.setAttribute('data-original-width', originalWidth);
+            target.setAttribute('data-original-height', originalHeight);
+
+            editor.update(json);
+        }
+
+        function saveChanges() {
+            const json = editor.get();
+            fetch('/save_annotations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(json)
+            })
+            .then(response => response.json())
+            .then(data => alert('Changes saved successfully!'))
+            .catch(error => alert('Error saving changes'));
+        }
+
+        // Add the undo function
+        function undoAllChanges() {
+            if (confirm('Are you sure you want to undo all changes? This cannot be reversed.')) {
+                editor.set(originalJsonData);
+                editor.expandAll();
+                
+                // Reset annotations to original positions
+                const annotations = originalJsonData['{{ filename }}'].paragraphs;
+                document.querySelectorAll('.annotation').forEach((el, index) => {
+                    const data = annotations[index];
+                    if (data) {
+                        el.style.transform = 'none';
+                        el.removeAttribute('data-x');
+                        el.removeAttribute('data-y');
+                        el.setAttribute('data-original-x', data.x);
+                        el.setAttribute('data-original-y', data.y);
+                        el.setAttribute('data-original-width', data.width);
+                        el.setAttribute('data-original-height', data.height);
+                    }
+                });
+                scaleAnnotations();
+            }
+        }
+
+        // Add this to your existing window.onload or initialization code
+        window.addEventListener('load', () => {
+            const image = document.getElementById('mainImage');
+            image.onload = () => {
+                originalImageWidth = image.naturalWidth;
+                originalImageHeight = image.naturalHeight;
+                scaleAnnotations();
+            };
+            if (image.complete) {
+                image.onload();
+            }
+        });
+    </script>
+</body>
+</html>

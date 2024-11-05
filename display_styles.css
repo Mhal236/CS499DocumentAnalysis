@@ -1,0 +1,42 @@
+/* General body styles */
+body {
+    font-family: 'Arial', sans-serif; /* Ensures a consistent font */
+    background-color: #f8f9fa; /* Light grey background for a subtle look */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Use 100% of the viewport height */
+}
+
+.container {
+    text-align: center; /* Center-align text */
+    width: 100%; /* Full width */
+}
+
+.img-fluid {
+    max-width: 90%; /* Limiting image width to 90% of its container */
+    height: auto; /* Maintain aspect ratio */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    margin-bottom: 20px; /* Space below the image */
+}
+
+.button-container {
+    margin-top: 10px;
+}
+
+button {
+    padding: 10px 20px; /* Padding for buttons */
+    margin: 0 5px; /* Margin around buttons */
+    background-color: #007bff; /* Primary button color */
+    color: white; /* Text color for buttons */
+    border: none; /* No borders */
+    border-radius: 5px; /* Rounded corners for buttons */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition for background color change */
+}
+
+button:hover {
+    background-color: #0056b4; /* Darker blue on hover */
+}

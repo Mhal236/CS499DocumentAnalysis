@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Analyzer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --background-color: #ecf0f1;
+            --container-bg: #ffffff;
+            --hover-color: #f7f9fc;
+        }
+
+        body {
+            background-color: var(--background-color);
+            padding-bottom: 40px;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .container {
+            background: var(--container-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .list-group-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            margin-bottom: 0.5rem;
+            border-radius: 8px !important;
+        }
+
+        .list-group-item:hover {
+            background-color: var(--hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .img-thumbnail {
+            max-width: 80px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .img-thumbnail:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 0.5rem 1.2rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-control {
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .form-control[type="file"] {
+            padding: 0.75rem;
+            height: auto;
+            line-height: 1.5;
+            background-color: var(--hover-color);
+            border: 2px dashed #cbd5e0;
+            cursor: pointer;
+        }
+
+        .upload-form {
+            background-color: var(--hover-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .text-decoration-none {
+            color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .text-decoration-none:hover {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Document Analyzer</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Upload a New Document</h2>
+                <form action="/" method="POST" enctype="multipart/form-data" class="upload-form">
+                    <div class="form-group">
+                        <input type="file" name="file" accept="image/*" required class="form-control mb-3">
+                        <button type="submit" class="btn btn-primary w-100">Upload Image</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-4">
+                <h2>Pre-annotated Documents</h2>
+                <ul class="list-group">
+                    {% for image in pre_annotated_images %}
+                        {% if image.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                            <li class="list-group-item">
+                                <a href="{{ url_for('preview', filename=image) }}" class="text-decoration-none">
+                                    <img src="{{ url_for('static', filename='images/folder1/' + image) }}" class="img-thumbnail">
+                                    {{ image }}
+                                </a>
+                                <a href="{{ url_for('annotate', filename=image) }}" class="btn btn-sm btn-primary float-right">Annotate</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="col-md-4">
+                <h2>Annotated Documents</h2>
+                <ul class="list-group">
+                    {% for image in annotated_images %}
+                        {% if image.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')) %}
+                            <li class="list-group-item">
+                                <a href="{{ url_for('view', filename=image) }}" class="stretched-link">{{ image }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

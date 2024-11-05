@@ -1,0 +1,156 @@
+{
+    "Invest1.png": {
+        "file_name": "Invest1.png",
+        "paragraphs": [
+            {
+                "x": 0,
+                "y": 1143,
+                "width": 952,
+                "height": 68
+            },
+            {
+                "x": 50,
+                "y": 923,
+                "width": 846,
+                "height": 56
+            },
+            {
+                "x": 52,
+                "y": 890,
+                "width": 227,
+                "height": 27
+            },
+            {
+                "x": 52,
+                "y": 837,
+                "width": 178,
+                "height": 26
+            },
+            {
+                "x": 50,
+                "y": 371,
+                "width": 847,
+                "height": 461
+            },
+            {
+                "x": 51,
+                "y": 318,
+                "width": 225,
+                "height": 29
+            },
+            {
+                "x": 50,
+                "y": 191,
+                "width": 190,
+                "height": 66
+            },
+            {
+                "x": 576,
+                "y": 153,
+                "width": 316,
+                "height": 167
+            },
+            {
+                "x": 51,
+                "y": 153,
+                "width": 167,
+                "height": 28
+            },
+            {
+                "x": 146,
+                "y": 43,
+                "width": 183,
+                "height": 44
+            },
+            {
+                "x": 54,
+                "y": 22,
+                "width": 85,
+                "height": 87
+            }
+        ]
+    },
+    "Invest2.jpg": {
+        "file_name": "Invest2.jpg",
+        "paragraphs": [
+            {
+                "x": 0,
+                "y": 669,
+                "width": 489,
+                "height": 24
+            },
+            {
+                "x": 181,
+                "y": 508,
+                "width": 131,
+                "height": 148
+            },
+            {
+                "x": 37,
+                "y": 508,
+                "width": 131,
+                "height": 147
+            },
+            {
+                "x": 331,
+                "y": 507,
+                "width": 131,
+                "height": 148
+            },
+            {
+                "x": 197,
+                "y": 455,
+                "width": 98,
+                "height": 52
+            },
+            {
+                "x": 341,
+                "y": 453,
+                "width": 98,
+                "height": 52
+            },
+            {
+                "x": 52,
+                "y": 453,
+                "width": 98,
+                "height": 52
+            },
+            {
+                "x": 26,
+                "y": 375,
+                "width": 440,
+                "height": 66
+            },
+            {
+                "x": 256,
+                "y": 354,
+                "width": 20,
+                "height": 19
+            },
+            {
+                "x": 236,
+                "y": 354,
+                "width": 19,
+                "height": 19
+            },
+            {
+                "x": 216,
+                "y": 354,
+                "width": 19,
+                "height": 19
+            },
+            {
+                "x": 50,
+                "y": 325,
+                "width": 391,
+                "height": 27
+            },
+            {
+                "x": 0,
+                "y": 0,
+                "width": 489,
+                "height": 314
+            }
+        ]
+    }
+}
